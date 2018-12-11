@@ -1,8 +1,9 @@
 #! /usr/bin/python
 
 import re
+import operator
 
-lines = [line.rstrip('\n') for line in open('test_input.txt')]
+lines = [line.rstrip('\n') for line in open('input.txt')]
 
 dep_re = re.compile("Step (\w+) must be finished before step (\w+) can begin.")
 
@@ -59,39 +60,62 @@ print("(Day 7, part 1) ordered steps: " + path)
 # part 2, multi-workers
 steps = create_graph()
 total_steps = len(steps)
-n_workers = 2
-base_step_time = 0
+n_workers = 5
+base_step_time = 60
 workers = [[] for i in range(0, n_workers)]
 ordinal_transform = 64
+end_times = {}
+next_steps = set()
 
 path = ""
 
 # every time we add a new step to a worker queue, the last step in that queue is done
-while total_steps > len(path):
+while total_steps > len(end_times):
     for value, step in steps.items():
+        if value in end_times:
+            continue
         safe_to_add = True
         if step[0]:
             for item in step[0]:
-                if item not in path:
+                if item not in end_times:
                     safe_to_add = False;
         if safe_to_add:
             next_steps.add(value)
-    if next_steps:
-        next_steps_list = sorted(next_steps)
-        to_add = next_steps_list[0]
 
-        # now the tricky part, add to worker with shortest queue
-        worker_id = 0
-        for i in range(0, n_workers):
-            if len(workers[i]) < len(workers[worker_id]):
-                worker_id = i
-
-        if len(workers[worker_id]) > 0:
-            path += workers[worker_id][-1]
-        steps.pop(to_add)
-        next_steps.remove(to_add)
+    while next_steps:
+        sorted_next_steps = sorted(next_steps)
+        current_step = sorted_next_steps[0]
+        next_steps.discard(current_step)
         
-        workers[worker_id] += (ord(to_add) - ordinal_transform + base_step_time) * [to_add]
+        start_time = 0
+        for item in steps[current_step][0]:
+            if start_time < end_times[item]:
+                start_time = end_times[item]
+            
+        shortest_wait = start_time
+        next_worker = 0
+        shortest_queue = len(workers[0])
+        for i in range(0, n_workers):
+            if len(workers[i]) <= start_time:
+                next_worker = i
+                shortest_wait = start_time - len(workers[i])
+                break
+            else:
+                shortest_wait = 0
+                if shortest_queue > len(workers[i]):
+                    shortest_queue = len(workers[i])
+                    next_worker = i
+        
+        if shortest_wait > 0:
+            workers[next_worker] += [0] * shortest_wait
+        work_time = ord(current_step) + base_step_time - ordinal_transform
+        print(current_step, ord(current_step), base_step_time, ordinal_transform)
+        workers[next_worker] += [current_step] * work_time
+        end_times[current_step] = len(workers[next_worker])
 
+print(end_times)
+sorted_by_time = sorted(end_times.items(), key=operator.itemgetter(1))
+for item in sorted_by_time:
+    path += item[0]
 
 print("(Day 7, part 2) multi workers step order:" + path)
