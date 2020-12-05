@@ -1,8 +1,9 @@
 #! /usr/bin/python
 
+import sys
 
 # to find the two entires summing to 2020, insert entry into a hash if (2020 - entry) doesn't already exist
-entries = [int(line.rstrip('\n')) for line in open('data.in')]
+entries = [int(line.rstrip('\n')) for line in open(sys.argv[1])]
 entry_set = set()
 for entry in entries:
     inverse = 2020 - entry

@@ -1,8 +1,9 @@
 #! /usr/bin/python
 
 import re
+import sys
 
-lines = [line.rstrip('\n') for line in open('data.in')]
+lines = [line.rstrip('\n') for line in open(sys.argv[1])]
 
 rule_re = re.compile("(\d+)-(\d+) (\w): (\w+)")
 # parse input into passwords array

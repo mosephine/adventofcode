@@ -1,6 +1,8 @@
 #! /usr/bin/python
 
-lines = [line.rstrip('\n') for line in open('data.in')]
+import sys
+
+lines = [line.rstrip('\n') for line in open(sys.argv[1])]
 
 # let's count some trees
 def count_trees(slope_x, slope_y, matrix):
