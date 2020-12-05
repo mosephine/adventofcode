@@ -8,7 +8,8 @@ passes.sort()
 print("(Day 5, Part 1) highest seat id: %d" % (passes[-1]))
 
 # find the missing seat
-search = set([i for i in passes if i in range (9, passes[-1] & int('1111111000', 2))])
+row_mask = int('1111111000', 2)
+search = set([i for i in passes if i in range (passes[0] & row_mask, passes[-1] & row_mask)])
 missing = (set([i for i in range(passes[0], passes[-1] + 1)]) - set(search)).pop()
 
 print("(Day 5, Part 2) my seat id: %d" % (missing))
